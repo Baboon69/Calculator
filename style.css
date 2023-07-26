@@ -1,0 +1,39 @@
+body{
+    margin: 0;
+    padding: 0;
+    font-family: 'Open Sans', sans-serif;
+}
+*{
+    box-sizing: border-box;
+}
+#calculator{
+    width: 300px;
+    padding: 4px;
+    margin: 0 auto;
+}
+
+#display{
+    width: 292px;
+    padding: 4px;
+    text-align: right;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 36px;
+}
+
+#buttons-container{
+    width: 292px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.button{
+    width: 64px;
+    height: 64px;
+    background-color: powderblue;
+    border: 0;
+    font-size: 32px;
+}
+.button:hover{
+    cursor: pointer;
+}
