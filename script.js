@@ -2,6 +2,7 @@ let buttons, display, stored, operation;
 let currentNumber, currentNumberStr;
 let storedNumber, storedNumberStr;
 let func;
+let isDeletable;
 
 function operate(a, b, operator){
     return operator(a,b);
@@ -18,7 +19,6 @@ function mul(x, y){
 function div(x, y){
     return x/y;
 }
-
 
 function setCurrent(num){
     currentNumber=num;
@@ -44,7 +44,9 @@ function Calculate(){
 function addNumber(num){
     if(currentNumberStr.length>=9)
         return;
-    
+    if(currentNumber>=1000000000)
+        return;
+    isDeletable=true;
     let tmp=currentNumberStr+num;
     setCurrent(Number(tmp));
     showCurrent();
@@ -58,7 +60,7 @@ function addFloat(){
     
     if(currentNumberStr.slice(-1)===".")
         return;
-    
+    isDeletable=true;
     currentNumberStr+=".";
     showCurrent();
 }
@@ -68,6 +70,7 @@ function setCurrent(num){
         if(num>=1000000000){
             currentNumber=num;
             currentNumberStr=`${currentNumber.toExponential()}`;
+            isDeletable=false;
             return;
         }
     }
@@ -76,12 +79,34 @@ function setCurrent(num){
         if(tmp.length>9){
             currentNumber=num;
             currentNumberStr=`${currentNumber.toFixed(8)}`;
-            return
+            isDeletable=false;
+            return;
         }
     }
 
     currentNumber=num;
     currentNumberStr=`${currentNumber}`;
+}
+
+function deleteLast(){
+    let tmp=currentNumberStr.substr(0,currentNumberStr.length-1);
+    if(!isDeletable)
+        return;
+    if(currentNumber==0)
+        return;
+    if(currentNumberStr.slice(-1)==="."){
+        currentNumberStr=tmp;
+        showCurrent();
+        return;
+    }
+    if(Number.isInteger(currentNumber))
+        if(currentNumber<10){
+            resetCurrent();
+            showCurrent();
+            return;
+        }
+    setCurrent(Number(tmp));
+    showCurrent();
 }
 
 function setOperation(){
@@ -160,6 +185,11 @@ function AssignEventFunction(btn){
         return;
     }
 
+    if(btn.textContent==="⌫"){
+        btn.addEventListener("click",deleteLast);
+        return;
+    }
+
     if(btn.textContent==="+"){
         btn.addEventListener("click", ()=>{
             if(func!=null)
@@ -215,6 +245,7 @@ function Calculator(){
     currentNumberStr="0";
     storedNumber=0;
     storedNumberStr="0";
+    isDeletable=false;
     display=document.querySelector("#display");
     stored=document.querySelector("#stored");
     operation=document.querySelector("#operation");
@@ -223,7 +254,19 @@ function Calculator(){
     buttons=document.querySelectorAll(".button");
     buttons.forEach(
         AssignEventFunction
-    )
+    );
+    window.addEventListener("keydown", (e)=>{
+        tmp=e.code.slice(-1);
+        if(isNumeric(tmp)){
+            addNumber(tmp);
+            return;
+        }
+        if(e.code==="Backspace"){
+            deleteLast();
+            return;
+        }
+        console.log(e.code);
+    });
     console.log(buttons);
 }
 
