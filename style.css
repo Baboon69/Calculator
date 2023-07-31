@@ -12,11 +12,22 @@ body{
     margin: 0 auto;
 }
 
+#screen{
+    font-family: 'Orbitron', sans-serif;
+}
+
+
+#top-display{
+    display: flex;
+    justify-content: space-between;
+    padding: 4px;
+    font-size: 18px;
+}
+
 #display{
     width: 292px;
     padding: 4px;
     text-align: right;
-    font-family: 'Orbitron', sans-serif;
     font-size: 36px;
 }
 
