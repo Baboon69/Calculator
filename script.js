@@ -3,7 +3,9 @@ let currentNumber, currentNumberStr;
 let storedNumber, storedNumberStr;
 let func;
 let isDeletable;
+let isShiftDown;
 
+// Math functionality
 function operate(a, b, operator){
     return operator(a,b);
 }
@@ -19,12 +21,7 @@ function mul(x, y){
 function div(x, y){
     return x/y;
 }
-
-function setCurrent(num){
-    currentNumber=num;
-    currentNumberStr=`${currentNumber}`;
-}
-
+//Calculates current math operation
 function Calculate(){
     if(func===div){
         if(currentNumber===0){
@@ -40,7 +37,7 @@ function Calculate(){
     func=null;
     updateScreen();
 }
-
+// Number functionality
 function addNumber(num){
     if(currentNumberStr.length>=9)
         return;
@@ -64,7 +61,6 @@ function addFloat(){
     currentNumberStr+=".";
     showCurrent();
 }
-
 function setCurrent(num){
     if(Number.isInteger(num)){
         if(num>=1000000000){
@@ -87,7 +83,16 @@ function setCurrent(num){
     currentNumber=num;
     currentNumberStr=`${currentNumber}`;
 }
-
+function resetCurrent(){
+    currentNumber=0;
+    currentNumberStr="0";
+}
+function storeCurrent(){
+    storedNumber=currentNumber;
+    storedNumberStr=currentNumberStr;
+    resetCurrent();
+}
+//backspace
 function deleteLast(){
     let tmp=currentNumberStr.substr(0,currentNumberStr.length-1);
     if(!isDeletable)
@@ -108,7 +113,36 @@ function deleteLast(){
     setCurrent(Number(tmp));
     showCurrent();
 }
-
+// A/C function
+function Clear(){
+    resetCurrent();
+    storeCurrent();
+    func=null;
+    setOperation();
+    updateScreen();
+}
+//Queue math operation functionality
+function pushNewOp(op){
+    if(func!=null)
+        Calculate();
+    
+    func=op;
+    storeCurrent();
+    updateScreen();
+}
+function minus(){
+    pushNewOp(sub);
+}
+function plus(){
+    pushNewOp(add);
+}
+function multiply(){
+    pushNewOp(mul);
+}
+function divide(){
+    pushNewOp(div);
+}
+//screen functionality
 function setOperation(){
     switch(func){
         case add:
@@ -127,16 +161,6 @@ function setOperation(){
             operation.textContent="";
     }
 }
-
-function resetCurrent(){
-    currentNumber=0;
-    currentNumberStr="0";
-}
-function storeCurrent(){
-    storedNumber=currentNumber;
-    storedNumberStr=currentNumberStr;
-    resetCurrent();
-}
 function showStored(){
     stored.textContent=storedNumberStr;
 }
@@ -149,16 +173,7 @@ function updateScreen(){
     setOperation();
 }
 
-function Clear(){
-    currentNumber=0;
-    currentNumberStr="0";
-    showCurrent();
-}
-
-function Placeholder(){
-    console.log("Place holder")
-}
-
+//Assigning functions to buttons
 function AssignEventFunction(btn){
     if(isNumeric(btn.textContent)){
         btn.addEventListener("click", () => {
@@ -178,7 +193,6 @@ function AssignEventFunction(btn){
 
     if(btn.textContent==="="){
         btn.addEventListener("click",()=>{
-            console.log("almost");
             if(func!=null)
                 Calculate();
         });
@@ -191,43 +205,19 @@ function AssignEventFunction(btn){
     }
 
     if(btn.textContent==="+"){
-        btn.addEventListener("click", ()=>{
-            if(func!=null)
-                Calculate();
-            func=add;
-            storeCurrent();
-            updateScreen();
-        });
+        btn.addEventListener("click", plus);
         return;
     }
     if(btn.textContent==="-"){
-        btn.addEventListener("click", ()=>{
-            if(func!=null)
-                Calculate();
-            func=sub;
-            storeCurrent();
-            updateScreen();
-        });
+        btn.addEventListener("click", minus);
         return;
     }
     if(btn.textContent==="*"){
-        btn.addEventListener("click", ()=>{
-            if(func!=null)
-                Calculate();
-            func=mul;
-            storeCurrent();
-            updateScreen();
-        });
+        btn.addEventListener("click", multiply);
         return;
     }
     if(btn.textContent==="/"){
-        btn.addEventListener("click", ()=>{
-            if(func!=null)
-                Calculate();
-            func=div;
-            storeCurrent();
-            updateScreen();
-        });
+        btn.addEventListener("click", divide);
         return;
     }
 
@@ -235,11 +225,10 @@ function AssignEventFunction(btn){
     
 }
 
-
-
-
-
+//main calculator function, entry point
 function Calculator(){
+    const strShift="Shift";
+    isShiftDown=false;
     func=null;
     currentNumber=0;
     currentNumberStr="0";
@@ -258,6 +247,12 @@ function Calculator(){
     window.addEventListener("keydown", (e)=>{
         tmp=e.code.slice(-1);
         if(isNumeric(tmp)){
+            if(isShiftDown){
+                if(tmp==="8"){
+                    multiply();
+                    return;
+                }
+            }
             addNumber(tmp);
             return;
         }
@@ -265,8 +260,38 @@ function Calculator(){
             deleteLast();
             return;
         }
-        console.log(e.code);
+        if(e.code==="Enter"){
+            e.preventDefault();
+            if(func!=null)
+                Calculate();
+            return;
+        }
+        if(e.code==="Equal"){
+            if(isShiftDown){
+                plus();
+                return;
+            }
+            if(func!=null)
+                Calculate();
+            return;
+        }
+        if(e.code==="Minus"){
+            minus();
+            return;
+        }
+        if(e.code==="Slash"){
+            e.preventDefault();
+            divide();
+            return;
+        }
+        if(e.code.includes(strShift)){
+            isShiftDown=true;
+        }
     });
+    window.addEventListener("keyup", (e)=>{
+        if(e.code.includes(strShift))
+            isShiftDown=false;
+    })
     console.log(buttons);
 }
 
